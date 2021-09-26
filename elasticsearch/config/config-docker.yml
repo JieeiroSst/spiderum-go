@@ -1,0 +1,7 @@
+server:
+  PortServerWorker: :5004
+  PortServerHttp: :5003
+  PprofPort: :5555
+
+elasticsearch:
+  dns: http://127.0.0.1:9200

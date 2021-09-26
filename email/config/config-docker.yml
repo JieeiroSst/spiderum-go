@@ -1,0 +1,21 @@
+server:
+  PortServer: :5005
+
+postgres:
+  PostgresqlHost: localhost
+  PostgresqlPort: 5433
+  PostgresqlUser: postgres
+  PostgresqlPassword: postgres
+  PostgresqlDbname: db
+  PgDriver: pgx
+
+rabbitmq:
+  Host: localhost
+  Port: 5672
+  User: guest
+  Password: guest
+  Exchange: emails-exchange
+  Queue: emails-queue
+  RoutingKey: emails-routing-key
+  ConsumerTag: emails-consumer
+  WorkerPoolSize: 24

@@ -1,0 +1,256 @@
+info:
+  contact: {}
+paths:
+  /:
+    get:
+      description: get all users
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      summary: Get all users
+      tags:
+      - Users
+    post:
+      description: Create Casbin Rule
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create Casbin Rule
+      tags:
+      - Casbins
+  /admin/:id:
+    delete:
+      description: Delete Casbin Rule
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete Casbin Rule
+      tags:
+      - Casbins
+    get:
+      description: get Casbin Rule By Id
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get Casbin Rule By Id
+      tags:
+      - Casbins
+  /admin/create:
+    post:
+      description: get Casbin Rule All
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: Casbin Rule All
+      tags:
+      - Casbins
+  /admin/endponit/:id:
+    put:
+      description: UpdateCasbinRuleEndpoint
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: UpdateCasbinRuleEndpoint
+      tags:
+      - Casbins
+  /admin/methos/:id:
+    put:
+      description: UpdateCasbinMethod
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: UpdateCasbinMethod
+      tags:
+      - Casbins
+  /admin/name/:id:
+    put:
+      description: UpdateCasbinRuleName
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: UpdateCasbinRuleName
+      tags:
+      - Casbins
+  /admin/ptype/:id:
+    put:
+      description: Update Casbin Rule Ptype
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update Casbin Rule Ptype
+      tags:
+      - Casbins
+  /api/delete:
+    delete:
+      description: Delete Posts
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      summary: Delete Posts
+      tags:
+      - posts
+  /api/posts:
+    post:
+      description: CreatePosts
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: CreatePosts
+      tags:
+      - CreatePosts
+  /api/posts/:id:
+    get:
+      description: get all post
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      summary: Get user by id
+      tags:
+      - post
+    put:
+      description: UpdatePosts
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: UpdatePosts
+      tags:
+      - Posts
+  /api/profile:
+    post:
+      description: Create Profile
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: Create Profile
+      tags:
+      - Users
+  /api/profile/:id:
+    put:
+      description: Update Profile
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      summary: Update Profile
+      tags:
+      - Users
+  /user/login:
+    post:
+      description: Login
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: Login
+      tags:
+      - Login
+  /user/singup:
+    post:
+      description: SignUp
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: SignUp
+      tags:
+      - Users
+swagger: "2.0"

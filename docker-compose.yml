@@ -1,0 +1,264 @@
+version: '3.2'
+services:
+  post_service_http_microservice:
+    build:
+      context: .
+      dockerfile: ./post_service/http.Dockerfile
+    container_name: app
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - post_service_db
+    networks:
+      - elk
+    entrypoint: [ "/app/wait-for.sh", "post_service_db:3306", "--", "/app/start.sh" ]
+    command: [ "/app/main" ]
+
+  post_service_grpc_microservice:
+    build:
+      context: .
+      dockerfile: ./post_service/http.Dockerfile
+    container_name: app
+    restart: always
+    ports:
+      - "5555:5555"
+    depends_on:
+      - post_service_db
+    networks:
+      - elk
+    entrypoint: [ "/app/wait-for.sh", "post_service_db:3306", "--", "/app/start.sh" ]
+    command: [ "/app/main" ]
+
+  post_service_db:
+    container_name: pg_container
+    image: mysql
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: db
+    volumes:
+      - db_data_mysql:/var/lib/mysql
+    networks:
+      - elk
+
+  db:
+    container_name: pg_container
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - elk
+
+  streaming:
+    build:
+      context: .
+      dockerfile: ./internal/streaming/Dockerfile
+    ports:
+      - "1935:1935"
+      - "7001:7001"
+      - "7002:7002"
+      - "8090:8090"
+    networks:
+      - elk
+
+  db_mysql:
+    image: "mysql:5.7.24"
+      restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "db"
+    volumes:
+      - database_mysql:/var/lib/mysql
+    networks:
+      - elk
+
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: ./config/elasticsearch/Dockerfile
+    volumes:
+      - type: bind
+        source: ./config/elasticsearch/config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+      - type: volume
+        source: elasticsearch
+        target: /usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ELASTIC_PASSWORD: changeme
+      discovery.type: single-node
+    networks:
+      - elk
+
+  logstash:
+    build:
+      context: .
+      dockerfile: ./config/logstash/Dockerfile
+    volumes:
+      - type: bind
+        source: ./config/logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+      - type: bind
+        source: ./config/logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: .
+      dockerfile: ./config/kibana/Dockerfile
+    volumes:
+      - type: bind
+        source: ./config/kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  grafana:
+    image: "grafana/grafana:5.4.3"
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+    volumes:
+      - /.lifter/grafana/provisioning:/etc/grafana/provisioning
+      - /.lifter/grafana/dashboards:/var/lib/grafana/dashboards
+
+  prometheus:
+    image: "prom/prometheus:v2.21.0"
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./lifter/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - 5673:5672
+      - 15673:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - elk
+
+  kong-database:
+    image: postgres:9.6
+    restart: always
+    networks:
+      - elk
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_DB: kong
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "kong"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  kong-migration:
+    image: kong:latest
+    command: "kong migrations bootstrap"
+    networks:
+      - elk
+    restart: on-failure
+    environment:
+      KONG_PG_HOST: kong-database
+    links:
+      - kong-database
+    depends_on:
+      - kong-database
+
+  kong:
+    image: kong:latest
+    restart: always
+    networks:
+      - elk
+    environment:
+      KONG_PG_HOST: kong-database
+      KONG_DATABASE: postgres
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_PROXY_LISTEN_SSL: 0.0.0.0:8443
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+    depends_on:
+      - kong-migration
+      - kong-database
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://kong:8001"]
+      interval: 5s
+      timeout: 2s
+      retries: 15
+    ports:
+      - "8001:8001"
+      - "8000:8000"
+
+  konga-prepare:
+    image: pantsel/konga:next
+    command: "-c prepare -a postgres -u postgresql://kong@kong-database:5432/konga_db"
+    networks:
+      - elk
+    restart: on-failure
+    links:
+      - kong-database
+    depends_on:
+      - kong-database
+
+  konga:
+    image: pantsel/konga:next
+    restart: always
+    networks:
+      - elk
+    environment:
+      DB_ADAPTER: postgres
+      DB_HOST: kong-database
+      DB_USER: kong
+      TOKEN_SECRET: km1GUr4RkcQD7DewhJPNXrCuZwcKmqjb
+      DB_DATABASE: konga_db
+      NODE_ENV: production
+    depends_on:
+      - kong-database
+    ports:
+      - "1337:1337"
+
+networks:
+  elk:
+    driver: bridge
+
+volumes:
+  elasticsearch:
+  database_mysql:
+  database_postgres:
+  db_data_mysql:

@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./";
+
+import "google/protobuf/timestamp.proto";
+
+message RequestPost {}
+
+message Post {
+  int32 id = 1;
+  int32 author_id = 2;
+  string title = 3;
+  string meta_title = 4;
+  string slug = 5;
+  string summary = 6;
+  int32  published = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  google.protobuf.Timestamp published_at = 10;
+  string content = 11;
+}
+
+message ResponsePost {
+  repeated Post posts = 1;
+}
+
+service HandleService {
+  rpc UpdatePost(RequestPost) returns(ResponsePost);
+}
