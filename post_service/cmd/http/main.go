@@ -8,9 +8,9 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gitlab.com/Spide_IT/spide_it/config"
 	casbinServer "gitlab.com/Spide_IT/spide_it/internal/casbin/server"
+	ipServer "gitlab.com/Spide_IT/spide_it/internal/ip/server"
 	postServer "gitlab.com/Spide_IT/spide_it/internal/post/server"
 	userServer "gitlab.com/Spide_IT/spide_it/internal/user/server"
-	ipServer "gitlab.com/Spide_IT/spide_it/internal/ip/server"
 	"gitlab.com/Spide_IT/spide_it/pkg/bigcache"
 	"gitlab.com/Spide_IT/spide_it/pkg/jwt"
 	"gitlab.com/Spide_IT/spide_it/pkg/mysql"
@@ -20,8 +20,6 @@ import (
 	"time"
 
 	_ "gitlab.com/Spide_IT/spide_it/docs"
-
-
 )
 
 func main(){

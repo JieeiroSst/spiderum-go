@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 
 import { connect, sendMsg } from "./api";
+
 import Header from "./components/Header/Header";
-import ChatHistory from "./components/ChatHistory";
+// import ChatHistory from "./components/ChatHistory";
 import ChatInput from "./components/ChatInput";
 import Message from "./components/Message";
 
@@ -35,12 +36,11 @@ class App extends Component {
     ));
     return (
       <div className="App">
+        <Header />
+        {/* <ChatHistory chatHistory={this.state.chatHistory} /> */}
         <div className="ChatHistory">
-          <h2>Chat History</h2>
           {messages}
         </div>
-        <Header />
-        <ChatHistory chatHistory={this.state.chatHistory} />
         <ChatInput send={this.send} />
       </div>
     );

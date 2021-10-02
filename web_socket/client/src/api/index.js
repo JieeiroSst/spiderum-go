@@ -1,4 +1,3 @@
-// api/index.js
 const socket = new WebSocket("ws://localhost:9000/ws");
 
 const connect = cb => {
