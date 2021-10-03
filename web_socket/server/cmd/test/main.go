@@ -45,5 +45,5 @@ func main(){
 
 	router.SetupRouter()
 
-	http.ListenAndServe(":8000", nil)
+	http.ListenAndServe(config.Server.PortServer, nil)
 }
